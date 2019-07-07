@@ -1,55 +1,74 @@
-const food = document.getElementById("head");
 var canv = document.getElementById("mycan");
 ctx = canv.getContext("2d");
 document.addEventListener("keydown", move);
-document.getElementById("btn").addEventListener("click", launch);
-var s = [];
-for (var i = 0; i < 5; i++) {
-  s[i] = i;
-}
-function launch() {
-  game();
-}
-//setInterval(game, 1000);
-var speed = 1;
+var speed = 3;
 var xv = 0;
 var yv = 0;
-
+var fy = 50;
+var fx = 50;
+var initpoint = new point();
+initpoint.x = -5;
+initpoint.y = -5;
 var length = 5;
 var snake = [];
-function point() {
-  this.x;
-  this.y;
+function point(x, y) {
+  this.x = x;
+  this.y = y;
 }
-var head = new point();
-head.x = 40;
-head.y = 40;
+var vitesse = length;
+var first = true;
+var gameover = setInterval(game, 1000 / length);
+
+var head = new point(40, 40);
 //initialize snake
-for (var i = 0; i < 5; i++) {
-  var pp = new point();
-  pp.x = 0;
-  pp.y = 0;
-  snake[i] = pp;
+for (var i = 0; i < length; i++) {
+  snake[i] = initpoint;
 }
+
 function game() {
-  for (var i = 0; i < snake.length; i++) {
-    snake[i].x = snake[i + 1].x;
+  for (var i = 0; i < snake.length - 1; i++) {
+    snake[i] = snake[i + 1];
   }
-  //snake[4].x = head.x;
-  //snake[4].y = head.y;
-  for (var i = 0; i < snake.length; i++) {
-    console.log("||" + i + "||" + snake[i].x);
-  }
+  snake[length - 1] = { x: head.x, y: head.y };
+
   head.x += xv;
   head.y += yv;
-  // food.style.top = y + "px";
-  //food.style.left = x + "px";
+  if (
+    head.x - fx <= 3 &&
+    head.x - fx >= -3 &&
+    head.y - fy <= 3 &&
+    head.y - fy >= -3
+  ) {
+    length++;
+    vitesse *= 2;
+    snake.unshift(head);
+    console.log(1000 / length);
+    clearInterval(gameover);
+    gameover = setInterval(game, 1000 / length);
+
+    frandom();
+
+    first = true;
+  }
+  if (head.x <= 3 || head.x >= 297 || head.y <= 3 || head.y >= 147) {
+    console.log("game over");
+    clearInterval(gameover);
+  }
+  if (first == false)
+    if (snake.find(x => x.x == head.x && x.y == head.y)) {
+      console.log(snake.indexOf(head));
+      console.log("game over");
+      clearInterval(gameover);
+    }
 
   print(head);
   printS(snake);
+  food();
+  borders();
 }
 // use arrow keys to move the snake
 function move(e) {
+  if (first == true) first = false;
   if (e.code == "ArrowDown") {
     xv = 0;
     yv = speed;
@@ -69,9 +88,9 @@ function move(e) {
 }
 function print(p) {
   ctx.fillStyle = "black";
-  ctx.fillRect(0, 0, 400, 800);
+  ctx.fillRect(0, 0, 300, 150);
   ctx.fillStyle = "red";
-  ctx.fillRect(p.x, p.y, 10, 10);
+  ctx.fillRect(p.x, p.y, 3, 3);
 }
 function printS(snake) {
   ctx.fillStyle = "black";
@@ -79,4 +98,19 @@ function printS(snake) {
     ctx.fillStyle = "lime";
     ctx.fillRect(snake[i].x, snake[i].y, 3, 3);
   }
+}
+function food() {
+  ctx.fillStyle = "blue";
+  ctx.fillRect(fx, fy, 3, 3);
+}
+function frandom() {
+  fx = Math.floor(Math.random() * 296);
+  fy = Math.floor(Math.random() * 146);
+}
+function borders() {
+  ctx.fillStyle = "gold";
+  ctx.fillRect(0, 0, 300, 3);
+  ctx.fillRect(0, 147, 300, 3);
+  ctx.fillRect(0, 0, 3, 150);
+  ctx.fillRect(297, 0, 3, 150);
 }
